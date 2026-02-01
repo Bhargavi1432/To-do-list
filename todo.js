@@ -1,80 +1,105 @@
 const todoInput = document.getElementById("todoInput");
 const todoList = document.getElementById("todoList");
 const addBtn = document.getElementById("addBtn");
+const clearBtn = document.getElementById("clearBtn");
 
-let todos = JSON.parse(localStorage.getItem("todos")) || [];
+const STORAGE_KEY = "todos";
 
-// Save todos
-function saveTodos() {
-  localStorage.setItem("todos", JSON.stringify(todos));
-}
+let todos = JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? [];
 
-// Render todos
-function renderTodos() {
+/* ---------- Utils ---------- */
+
+const saveTodos = () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+};
+
+const createTodo = (text) => ({
+  id: crypto.randomUUID(),
+  text,
+  completed: false
+});
+
+/* ---------- Render ---------- */
+
+const renderTodos = () => {
   todoList.innerHTML = "";
 
-  todos.forEach((todo, index) => {
+  todos.forEach(({ id, text, completed }) => {
     const li = document.createElement("li");
-    if (todo.completed) li.classList.add("completed");
+    li.dataset.id = id;
+    li.classList.toggle("completed", completed);
 
-    const span = document.createElement("span");
-    span.textContent = todo.text;
+    li.innerHTML = `
+      <span>${text}</span>
+      <div class="actions">
+        <button class="toggle">✓</button>
+        <button class="delete">✕</button>
+      </div>
+    `;
 
-    const actions = document.createElement("div");
-    actions.className = "actions";
-
-    const toggleBtn = document.createElement("button");
-    toggleBtn.textContent = "✓";
-    toggleBtn.className = "toggle";
-    toggleBtn.addEventListener("click", () => toggleTodo(index));
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "✕";
-    deleteBtn.className = "delete";
-    deleteBtn.addEventListener("click", () => deleteTodo(index));
-
-    actions.appendChild(toggleBtn);
-    actions.appendChild(deleteBtn);
-
-    li.appendChild(span);
-    li.appendChild(actions);
     todoList.appendChild(li);
   });
-}
+};
 
-// Add todo
-function addTodo() {
+/* ---------- Actions ---------- */
+
+const addTodo = () => {
   const text = todoInput.value.trim();
-  if (text === "") return;
+  if (!text) return;
 
-  todos.push({ text, completed: false });
+  todos.push(createTodo(text));
   todoInput.value = "";
+
   saveTodos();
   renderTodos();
-}
+};
 
-// Toggle todo
-function toggleTodo(index) {
-  todos[index].completed = !todos[index].completed;
+const toggleTodo = (id) => {
+  todos = todos.map(todo =>
+    todo.id === id
+      ? { ...todo, completed: !todo.completed }
+      : todo
+  );
+
   saveTodos();
   renderTodos();
-}
+};
 
-// Delete todo
-function deleteTodo(index) {
-  todos.splice(index, 1);
+const deleteTodo = (id) => {
+  todos = todos.filter(todo => todo.id !== id);
+
   saveTodos();
   renderTodos();
-}
+};
 
-// Events
+const clearTodos = () => {
+  todos = [];
+  localStorage.removeItem(STORAGE_KEY);
+  renderTodos();
+};
+
+/* ---------- Events ---------- */
+
 addBtn.addEventListener("click", addTodo);
+
 todoInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addTodo();
 });
 
-// Initial load
+clearBtn.addEventListener("click", clearTodos);
+
+// Event delegation for toggle & delete
+todoList.addEventListener("click", (e) => {
+  const li = e.target.closest("li");
+  if (!li) return;
+
+  const id = li.dataset.id;
+
+  if (e.target.classList.contains("toggle")) toggleTodo(id);
+  if (e.target.classList.contains("delete")) deleteTodo(id);
+});
+
+/* ---------- Init ---------- */
+
 renderTodos();
-
-
 
