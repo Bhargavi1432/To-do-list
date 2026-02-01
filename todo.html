@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynamic Todo List</title>
-
-  <!-- Link CSS -->
-  <link rel="stylesheet" href="first.css">
+  <title>Vanilla JS Todo App</title>
+  <link rel="stylesheet" href="todo.css" />
 </head>
 <body>
-
-  <div class="todo-container">
-    <h1>Todo List</h1>
+  <div class="app">
+    <h1>Todo App</h1>
 
     <div class="input-group">
-      <input type="text" id="todoInput" placeholder="Add a new task..." />
+      <input id="todoInput" type="text" placeholder="Add a new todo..." />
       <button id="addBtn">Add</button>
     </div>
+
+    <button id="clearBtn" class="clear">Clear All</button>
 
     <ul id="todoList"></ul>
   </div>
 
-  <!-- Link JavaScript -->
-  <script src="first.js"></script>
+  <script src="todo.js"></script>
 </body>
 </html>
